@@ -1,11 +1,33 @@
 # HW 1: WebGL Fireball
 
-Live Demo：
+## My Submission
+
+**Live Demo：** https://sqqqqqqs.github.io/hw01-fireball/
 
 <p align="center">
-  <img width="360" height="360" src="fireball.png">
+  <img width="600" src="sample.png">
 </p>
-<p align="center">(source: Aidan Gideon, CIS 5660 Fall 2025)</p>
+<p align="center">A noise-driven fireball, rendered entirely in the vertex/fragment shaders.</p>
+
+### What it does
+
+The base icosphere is displaced in the vertex shader with two layers of noise, then colored in the fragment shader based on how much each point was displaced:
+
+- **Low-frequency, high-amplitude shape** — a sum of sine waves along each axis (plus a triangle-wave wobble) gives the fireball its big, uneven lumps instead of a perfect sphere.
+- **Domain warp** — before either noise layer is sampled, the input position is perturbed by a coarser noise field. Without this the low-frequency waves shift in sync everywhere at once and the whole sphere looks like it's "breathing"; warping the input first makes it roil unevenly instead.
+- **Higher-frequency, lower-amplitude fBm** — 4 octaves of value noise add fine surface detail on top of the big shape, plus a thin "vein" ridge picked out wherever the detail noise sits near its midpoint.
+- **Fire palette** — the fragment shader eases between a dark ember color and a bright "hot" color based on the local noise detail and how far a vertex is displaced, so raised/noisy areas read as hotter. A fresnel-style rim term adds a warm glow around the silhouette, and the whole thing self-illuminates (it never goes fully black on the side facing away from the light, since fire doesn't need external lighting to be visible).
+- Both shaders animate off a `u_Time` uniform — the surface continuously roils, and the color gets a very subtle flicker over time.
+
+**Toolbox functions used** : `bias`, `gain`, `triangleWave`, and `pulse` (implemented as the smooth Gaussian-like `cubicPulse`, not a hard step).
+
+### Interactivity
+
+dat.GUI exposes five live controls: `tesselations` (mesh density), `Displacement` (overall bump strength), `Noise Scale` (fine detail frequency), `Mouse Strength` (how hard the cursor pushes), and `Hot Color` (the palette's hottest color) — plus a **Reset to Defaults** button that snaps everything back to a clean baseline look.
+
+### Extra Spice: Mouse Interactivity
+
+Clicking and holding on the fireball casts a ray from the camera through the cursor, intersects it with the fireball's approximate bounding sphere, and uses that hit point to bulge the surface outward and brighten it — so the fireball can be pushed and prodded with the cursor in real time.
 
 ## Objective
 Get comfortable with using WebGL and its shaders to generate an interesting 3D, continuous surface using a multi-octave noise algorithm.
